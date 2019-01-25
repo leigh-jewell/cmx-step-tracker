@@ -569,9 +569,9 @@ A backup of the database only requires around 18Mbytes. A simple script can be u
 
 #!/bin/bash
 
-logfile=/home/ljewell/db\_backup/pgsql.log
+logfile=/home/leigh/db\_backup/pgsql.log
 
-backup\_dir=/home/ljewell/db\_backup
+backup\_dir=/home/leigh/db\_backup
 
 touch $logfile
 
