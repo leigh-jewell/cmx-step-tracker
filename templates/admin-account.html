@@ -1,0 +1,97 @@
+{% extends "admin-base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <div class="container" class="col-xs-12">
+        <div class="row">
+            <div  class="col-xs-9">
+                <h2>Add user account</h2>
+                <p>Create a user account directly.</p>
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#add_user">Add user</button>
+                <div id="add_user" class="collapse">
+                    <form class="form-group" action="/account/update_user" method="POST">
+                        <div class="form-group-inline">
+                            <label for="email">Email:</label>
+                            <input type="text" class="form-control" id="email" name="email" placeholder="Email">
+                        </div>
+                        <div class="form-group-inline">
+                            <label for="email">Name:</label>
+                            <input type="text" class="form-control" id="nickname" name="nickname" placeholder="Display name">
+                        </div>
+                        <div class="form-group-inline">
+                            <label for="email">Password:</label>
+                            <input type="password" class="form-control" type="text" name="password" placeholder="Password">
+                        </div>
+                        <div class="form-group-inline">
+                            <label for="email">Confirm password:</label>
+                            <input type="password" class="form-control" type="text" name="confirm_password" placeholder="Confirm password">
+                        </div>
+                        <div class="form-group-inline">
+                            <span class="input-group-btn">
+                            <button type="submit" name="submit" value="add" class="btn btn-primary">Submit</button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2>Registered users</h2>
+            <form class="form-inline" action="/admin-accounts" method="POST">
+                <input type="text" class="form-control" type="text" name="search" placeholder="Email search string ">
+                <input type="submit" name="submit" value="Search" class="btn btn-primary">
+            </form>
+            <table class="table table-striped">
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Admin</th>
+                    <th>Password</th>
+                    <th>Confirm Password</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+                {% if users %}
+                    {% for user in users %}
+                    <tr>
+                        <form class="form-inline" action="/account/update_user" method="POST">
+                            <td>{{user.email}}</td>
+                            <td><input type="text" class="form-control" type="text" name="new_nickname" id="new_nickname" value="{{user.nickname}}"></td>
+                            {% if user.admin %}
+                                {%  if "admin@cisco.com" == user.email %}
+                                    <label class="checkbox disabled">
+                                        <td><input checked disabled type="checkbox" name="new_is_admin"></td>
+                                    </label>
+                                {% else %}
+                                    <label class="checkbox">
+                                        <td><input checked type="checkbox" name="new_is_admin"></td>
+                                    </label>
+                                {% endif %}
+                            {% else %}
+                                <label class="btn-default">
+                                    <td>
+                                        <input type="checkbox" name="new_is_admin" unchecked">
+                                    </td>
+                                </label>
+                            {% endif %}
+                            <td><input type="password" class="form-control" type="text" name="password" placeholder="Password"></td>
+                            <td><input type="password" class="form-control" type="text" name="confirm_password" placeholder="Confirm password"></td>
+                            <td><input type="submit" name="submit" value="update" class="btn btn-primary"></td>
+                            <td><input type="submit" name="submit" value="delete" class="btn btn-primary"></td>
+                            <input type="text" name="email" value="{{user.email}}" hidden>
+                            <input type="text" name="nickname" value="{{user.nickname}}" hidden>
+                            <input type="text" name="is_admin" value="{{user.admin}}" hidden>
+                        </form>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

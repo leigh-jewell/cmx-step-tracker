@@ -1,0 +1,37 @@
+{% extends "admin-base.html" %}
+
+{% block content %}
+    <div class="jumbotron">
+      <div class="container">
+        <h1>Dashboard</h1>
+        <p>View a summary of the CMX walking competition below.</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <h2>Leaderboard</h2>
+          <p>Ordered list of delegates devices and the distance that has been covered.</p>
+            <table class="table table-striped">
+              <tr>
+                 <th>Position</th>
+                 <th>Name</th>
+                 <th>MAC</th>
+                 <th>Distance</th>
+              </tr>
+              {% if devices %}
+                  {% for device in devices %}
+                      <tr>
+                          <td>{{loop.index}}</td>
+                          <td>{{device.owner}}</td>
+                          <td>{{device.mac}}</td>
+                          <td>{{'{:,.2f}'.format(device.mtrs)}}</td>
+                      </tr>
+                  {% endfor %}
+              {% endif %}
+            </table>
+        </div>
+      </div>
+    </div>
+{% endblock %}

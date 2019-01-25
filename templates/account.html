@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div>
+    <li class="list-group-item">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#account">Account Info</button>
+        <div id="account" class="collapse">
+            <h3>Account</h3>
+            <p>
+                <h4>Email</h4>{{user.email}}
+                <h4>Name</h4>{{user.nickname}}
+            </p>
+            <p>If you need to make changes to your account visit the Cisco on Cisco IT stand and ask for help.</p>
+        </div>
+    </li>
+      <li class="list-group-item">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#spark">Spark Room</button>
+        {% if spark_added %}
+            <div>Added <b>{{ user.email }}</b> to space. You should get an email invitation to the space.</div>
+        {% endif %}
+        <div id="spark" class="collapse">
+            <form class="form-inline" action="/account/join_spark" method="POST">
+                <h3>Spark Room</h3>
+                <p>Join the Cisco Live Seat for Swag spark room to get regular leaderboard updates.</p>
+                <p>Email address that will be used <b>{{ user.email }}</b></p>
+                <p>More info visit the <a href="https://www.ciscospark.com">Cisco Spark page</a></p>
+                <button type="submit" class="btn btn-primary">Join Spark Room</button>
+                <input type="text" name="email" value="{{user.email}}" hidden>
+                </div>
+            </form>
+        </div>
+    </li>
+
+    <li class="list-group-item">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#demo">Instructions</button>
+        <div id="demo" class="collapse">
+            <h4>Instructions</h4>
+                <p>If your mobile's MAC address is displayed, simply click the add button and your device will be tracked. </p>
+                <p>If you MAC cannot be detected, please enter it manually in the field provided.</p>
+                <h4>Finding your MAC on iOS devices</h4>
+                <p>iOS MAC can be found under:</p>
+                <p>Settings > General > About > Wi-Fi Address</p>
+                <h4>Finding your MAC on Android devices</h4>
+                <p>Android MAC can be found under:</p>
+                <p>Apps > Settings > About device > Status > Wi-Fi MAC Address</p>
+        </div>
+    </li>
+    <li class="list-group-item">
+    <h4>Currently tracked devices</h4>
+    <p>Be aware that your MAC has been scrambled for privacy. If you are unsure it has been added correctly, simply delete and add it again.</p>
+    {% if tracked %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <tr>
+                    <th>MAC</th>
+                    <th>Metres</th>
+                    <th>Place</th>
+                    <th></th>
+                </tr>
+            {% for device in tracked %}
+                <tr>
+                    <form class="form-inline" action="/account/delete_device" method="POST">
+                        <td>{{device.mac}}</td>
+                        <td>{{'{:,.2f}'.format(device.mtrs)}}</td>
+                        <td>{{device.place}}</td>
+                        <td><input type="submit" value="Delete" class="btn btn-danger btn-xs"></td>
+                        <input type="text" name="mac" value="{{device.mac}}" hidden>
+                    </form>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </li>
+    {% else %}
+        <p>No devices currently tracked.</p>
+    </li>
+    {% endif %}
+    <li class="list-group-item">
+        <h4>Add new device:</h4>
+    {% if mac != '00:00:00:00:00:00' %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <tr>
+                    <th>IP Address</th>
+                    <th>MAC</th>
+                    <th>Add</th>
+                </tr>
+                <tr>
+                    <td>{{ip}}</td>
+                    <td>{{mac}}</td>
+                    <form class="form-inline" action="/account/add_device" method="POST">
+                    <td><input type="submit" value="Add" class="btn btn-primary"></td>
+                        <input type="text" name="mac" value="{{mac}}" hidden>
+                    </form>
+                </tr>
+            </table>
+        </div>
+    </li>
+    {% else %}
+      <p>MAC address cannot be determined.</p>
+      <p>Please add manually.</p>
+    </li>
+    <li class="list-group-item">
+        <h4>Track mac address:</h4>
+            {% if add_device_form.mac.errors %}
+                <ul class="errors">{% for error in add_device_form.mac.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+            {% endif %}
+            <form class="form-inline" action="/account/add_device" method="POST">
+                <div class="input-group">
+                      <div class="input-group-addon">MAC</div>
+                      <input type="text" class="form-control" id="mac" name="mac" placeholder="{{mac}}">
+                      <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">Track</button>
+                      </span>
+                  </div>
+            </form>
+    </li>
+    {% endif %}
+ </div>
+{% endblock %}

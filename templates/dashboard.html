@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="table-responsive">
+    <li class="list-group-item">
+      <h3>Leaderboard</h3>
+        <p>List of registered users that have covered the most distance. This list may be different to final list
+        used for the prize draw.</p>
+        <table class="table table-striped">
+          <tr>
+             <th>Position</th>
+             <th>Name</th>
+            <th>Distance</th>
+          </tr>
+          {% if devices %}
+              {% for device in devices %}
+                {% if user == device.owner %}
+                    <tr class="table success">
+                {%endif%}
+                      <td>{{loop.index}}</td>
+                      <td>{{device.nickname}}</td>
+                      <td>{{'{:,.0f}'.format(device.mtrs)}}</td>
+                  </tr>
+              {% endfor %}
+          {% endif %}
+        </table>
+    </li>
+    <li class="list-group-item">
+        <h3>Prize Draw</h3>
+        <p>To claim your prize you need to be at the Cisco on Cisco IT Stand in the World of Solutions at the
+            time of the prize draw.</p>
+        <p>Check the Sweat for swag Spark room for latest updates on prize draw times. You can
+        join the Spark room from the Account page.</p>
+        <p><b>You must be in attendance to claim your prize,</b> and if you are not present prizes will be awarded
+            to the next person on the leaderboard.</p>
+        <p>Good luck!</p>
+    </li>
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

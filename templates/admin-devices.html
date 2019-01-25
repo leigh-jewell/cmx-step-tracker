@@ -1,0 +1,121 @@
+{% extends "admin-base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+  <div class="container">
+    <h1>Admin devices</h1>
+    <p>Manage user devices attached to user accounts.</p>
+  </div>
+</div>
+
+<div class="container">
+  <div>
+    <li class="list-group-item">
+        <h2>Verify MAC Hash</h2>
+        <p>Convert the real MAC to the CMX hash MAC to allow for verification.</p>
+        <form class="form-inline" action="/account/hash_mac" method="POST">
+            {% if real_mac %}
+                {% if hash_mac == verify_hash_mac%}
+                    <p><b>Verified Hashed MAC:</b> {{ verify_hash_mac }}
+                    <span class="glyphicon glyphicon-ok-sign text-success"></span></p>
+                {% else %}
+                    <p><b>NOT verified Hashed MAC:</b> {{ verify_hash_mac }}
+                    <span class="glyphicon glyphicon-remove-circle text-danger"></span></p>
+                    </p>
+                {% endif %}
+            {% endif %}
+            <div class="input-group">
+                  <div class="input-group-addon">Hash MAC</div>
+                  <input type="text" class="form-control" id="hash_mac" name="hash_mac" placeholder="{{hash_mac}}">
+                  <div class="input-group-addon">Real MAC</div>
+                  <input type="text" class="form-control" id="real_mac" name="real_mac" placeholder="{{real_mac}}">
+                  <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Compare</button>
+                  </span>
+              </div>
+        </form>
+    </li>
+    <li class="list-group-item">
+    <h2>Get MAC for ip</h2>
+    <p>Test retrieving MAC from the CMX</p>
+    <form class="form-inline" action="/account/get_mac" method="POST">
+        {% if owner %}
+                <p><b>Owner found:</b> {{ owner.owner }}
+                <span class="glyphicon glyphicon-ok-sign text-success"></span></p>
+        {% endif %}
+        <div class="input-group">
+            <div class="input-group-addon">Client IP address</div>
+            <input type="text" class="form-control" id="lookup_ip" name="lookup_ip" value={{ lookup_ip }}>
+            <div class="input-group-addon">Real MAC</div>
+            <input type="text" class="form-control" id="lookup_mac" name="lookup_mac" value="{{lookup_mac}}">
+            <div class="input-group-addon">Hash MAC</div>
+            <input type="text" class="form-control" id="lookup_hash_mac" name="lookup_hash_mac" value="{{lookup_hash_mac}}">
+            <span class="input-group-btn">
+            <button type="submit" class="btn btn-primary">Get MAC</button>
+            </span>
+          </div>
+    </form>
+    </li>
+    <li class="list-group-item">
+    <h2>Add device to user</h2>
+    <p>Add a device to user with ip, real mac or hash mac.</p>
+    <form class="form-inline" action="/account/update_device_rego" method="POST">
+        <div class="input-group">
+            <div class="input-group-addon">Email</div>
+            <input type="text" class="form-control" id="email" name="email">
+            <div class="input-group-addon">IP</div>
+            <input type="text" class="form-control" id="ip" name="ip">
+            <div class="input-group-addon">Real MAC</div>
+            <input type="text" class="form-control" id="new_mac" name="new_mac">
+            <div class="input-group-addon">Hash MAC</div>
+            <input type="text" class="form-control" id="new_hash_mac" name="new_hash_mac">
+            <span class="input-group-btn">
+            <button type="submit" class="btn btn-primary" name="submit" value="new">Add Device</button>
+            </span>
+          </div>
+    </form>
+    </li>
+
+    <li class="list-group-item">
+        <div>
+            <h2>Registered Devices</h2>
+            <p>Deleting will deregister the mac from the user but retain the distance information.</p>
+                <form class="form-inline" action="/admin-devices" method="POST">
+                    <input type="text" class="form-control" type="text" name="search" placeholder="Email owner search string ">
+                    <input type="submit" name="submit" value="Search" class="btn btn-primary">
+                </form>
+                 <table class="table table-striped">
+                    <tr>
+                        <th>Place</th>
+                        <th>MAC</th>
+                        <th>Distance</th>
+                        <th>Owner</th>
+                        <th>Email</th>
+                        <th>New Device</th>
+                        <th>Update Device</th>
+                        <th>Delete</th>
+                    </tr>
+                {% if devices %}
+                    {% for device in devices %}
+                        <tr>
+                            <form class="form-inline" action="/account/update_device_rego" method="POST">
+                                <td>{{device.place}}</td>
+                                <td>{{device.mac}}</td>
+                                <td>{{'{:,.0f}'.format(device.mtrs)}}</td>
+                                <td>{{device.nickname}}</td>
+                                <td>{{device.owner}}</td>
+                                <td><input type="text" class="form-control" name="new_mac" placeholder="New MAC"></td>
+                                <td><input type="submit" name="submit" value="update" class="btn btn-primary"></td>
+                                <td><input type="submit" name="submit" value="delete" class="btn btn-primary"></td>
+                                <input type="text" name="mac" value="{{device.mac}}" hidden>
+                                <input type="text" name="email" value="{{device.owner}}" hidden>
+                            </form>
+                        </tr>
+                    {% endfor %}
+                 {% endif %}
+                </table>
+        </div>
+    </li>
+  </div>
+</div>
+{% endblock %}

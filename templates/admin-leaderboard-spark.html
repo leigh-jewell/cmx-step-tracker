@@ -1,0 +1,45 @@
+{% extends "admin-base.html" %}
+
+{% block content %}
+    <div class="jumbotron">
+      <div class="container">
+        <h1>Day Leaderboard</h1>
+        <p>A summary of the CMX leaderboard for a particular day for the walking competition. </p>
+      </div>
+    </div>
+
+      <div class="container">
+        <form class="form-inline" action="/admin-leaderboard-spark" method="POST">
+        <div class="input-group">
+            <div class="input-group-addon"><b>Date for leaderboard</b></div>
+            {{ leaderboardform.date(class="form-control", placeholder="YYYY-MM-DD", value=date )}}
+            <div class="input-group-addon"><b>Number delegates</b></div>
+            {{ leaderboardform.number_delegates(class="form-control", placeholder="Number", value=number_delegates)}}
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary">Create message</button>
+            </span>
+        </div>
+        </form>
+    </div>
+
+ <div class="container">
+        <h2>Spark post: </h2>
+        <p>Modify the spark message prior to posting:</p>
+         <form class="form-inline" action="/admin-leaderboard-spark-message" method="POST">
+            <div class="form-group">
+                <textarea class="form-control" rows="15" cols="100" id="spark_post" name="spark_post">
+###Sweat for swag competition leader board update
+
+---
+
+{% for device in devices_date -%}
+{{ "{}. ".format(loop.index) }} {{ "{}".format(device.nickname) }} {{ "{:.2f} mtrs".format(device.mtrs) }}
+{% endfor %}
+                </textarea>
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Post spark message</button>
+                </span>
+            </div>
+        </form>
+   </div>
+{% endblock %}

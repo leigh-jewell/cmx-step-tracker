@@ -1,0 +1,337 @@
+{% extends "admin-base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h2>Admin Dashboard</h2>
+        <div class="row">
+            <div class="col-2">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <span class="badge">{{'{:,}'.format(max_peak_notification)}}</span>
+                        Peak notifications per sec
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{'{:,}'.format(max_peak_percent)}}</span>
+                        Peak notifications percent of maximum
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{'{:,}'.format(total_users)}}</span>
+                        Registered users
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{'{:,}'.format(total_tracked)}}</span>
+                        Tracked devices
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{'{:,}'.format(total_devices)}}</span>
+                        CMX discovered devices
+                    </li>
+            </ul>
+            </div>
+        </div>
+        <div class="col-2">
+        </div>
+    </div>
+
+    <div class="container">
+        <form class="form-inline" action="/adm" method="POST">
+                    <div class="input-group">
+                        <label class="sr-only" for="report_records" >Add MAC</label>
+                          <div class="input-group-addon">Number of records</div>
+                          <input type="number" step=1 max=1000 class="form-control" id="report_records" name="report_records" value="{{report_records}}" placeholder="{{report_records}}">
+                          <span class="input-group-btn">
+                            <button type="submit" class="btn btn-primary">Run Report</button>
+                          </span>
+                      </div>
+        </form>
+        <div class="row">
+            <div class="col" id="area1">
+                <h3>CMX Notification Rate</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" id="area2">
+                <h3>Registered users</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col" id="area3">
+                <h3>Tracked devices</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <style> /* set the CSS */
+
+        .line {
+          fill: none;
+          stroke: steelblue;
+          stroke-width: 2px;
+        }
+
+        .area {
+          fill:     steelblue;
+        }
+
+        .axis {
+            class: class-weight-bold;
+            font-size: 11px;
+        }
+
+        </style>
+        <script>
+
+        // Set the dimensions of the canvas / graph
+        var	margin = {top: 30, right: 100, bottom: 30, left: 50},
+        width = 1200 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+        var data = {{ count_history_json | safe }};
+
+        var max_rate = {{ max_transactions }};
+
+        var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+
+       // format the data
+        data.forEach(function(d) {
+            d.time = parseTime(d.time);
+            d.user_count = +d.user_count;
+            d.device_count = +d.device_count;
+            d.notification_count = +d.notification_count;
+          });
+          console.log(data);
+
+
+        var peak_rate = d3.max(data, function(d) { return d.notification_count/60; });
+
+        var x = d3.scaleTime()
+            .rangeRound([0, width]);
+
+        var y = d3.scaleLinear()
+            .rangeRound([height, 0]);
+
+        var chart1 = d3.select("#area1")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var notification_line = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(d.notification_count/60); });
+
+        var notification_peak_line = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(peak_rate); })
+
+        var notification_max_line = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(max_rate); })
+
+
+        var notification_area = d3.area()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y0(height)
+            .y1(function(d) { return y(d.notification_count/60); });
+
+        x.domain(d3.extent(data, function(d) { return d.time; }));
+        y.domain([0, d3.max(data, function(d) { return d.notification_count/60; })]);
+
+        chart1.append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")))
+              .append("text")
+              .attr("x", width / 2)
+              .attr("y", margin.bottom * 0.9)
+              .attr("dx", "0.32em")
+              .attr("fill", "#000")
+              .attr("text-anchor", "start")
+              .text("Date");
+
+        chart1.append("g")
+              .attr("class", "axis")
+              .call(d3.axisLeft(y))
+              .append("text")
+              .attr("fill", "#000")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 0 - margin.left)
+              .attr("x",0 - (height / 2))
+              .attr("dy", "1em")
+              .attr("text-anchor", "middle")
+              .text("Notification rate per sec");
+
+        chart1.append("path")
+              .data([data])
+              .attr("fill", "none")
+              .attr("stroke", "steelblue")
+              .attr("stroke-linejoin", "round")
+              .attr("stroke-linecap", "round")
+              .attr("stroke-width", 1.5)
+              .attr("d", notification_line);
+
+        chart1.append("path")
+            .data([data])
+            .attr("fill", "none")
+            .attr("stroke", "orange")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .attr("stroke-width", 1.5)
+            .attr("d", notification_peak_line);
+
+        chart1.append("text")
+            .attr("transform", "translate(" + (width+3) + "," + y(peak_rate) + ")")
+            .attr("dy", ".35em")
+            .attr("text-anchor", "peak")
+            .style("fill", "orange")
+            .text("Peak " + Math.trunc(peak_rate));
+
+        chart1.append("path")
+              .data([data])
+              .attr("fill", "none")
+              .attr("stroke", "red")
+              .attr("stroke-linejoin", "round")
+              .attr("stroke-linecap", "round")
+              .attr("stroke-width", 1.5)
+              .attr("d", notification_max_line);
+
+        chart1.append("text")
+            .attr("transform", "translate(" + (width+3) + "," + y(max_rate) + ")")
+            .attr("dy", ".35em")
+            .attr("text-anchor", "max")
+            .style("fill", "red")
+            .text("Max");
+
+
+        chart1.append("path")
+            .data([data])
+            .attr("class", "area")
+            .attr("fill", "steelblue")
+            .attr("d", notification_area);
+
+        var chart2 = d3.select("#area2")
+            .append("svg")
+            .attr("class", "scaled-svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var user_line = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(d.user_count); });
+
+        var user_area = d3.area()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y0(height)
+            .y1(function(d) { return y(d.user_count); });
+
+        x.domain(d3.extent(data, function(d) { return d.time; }));
+        y.domain([0, d3.max(data, function(d) { return d.user_count; })]);
+
+        chart2.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")))
+            .append("text")
+            .attr("x", width / 2)
+            .attr("y", margin.bottom * 0.9)
+            .attr("dx", "0.32em")
+            .attr("fill", "#000")
+            .attr("text-anchor", "start")
+            .text("Date");
+
+        chart2.append("g")
+              .attr("class", "axis")
+              .call(d3.axisLeft(y))
+              .append("text")
+              .attr("fill", "#000")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 0 - margin.left)
+              .attr("x",0 - (height / 2))
+              .attr("dy", "1em")
+              .attr("text-anchor", "middle")
+              .text("Number of users");
+
+        chart2.append("path")
+              .data([data])
+              .attr("class", "line")
+              .attr("d", user_line);
+
+        chart2.append("path")
+                .data([data])
+                .attr("class", "area")
+                .attr("fill", "steelblue")
+                .attr("d", user_area);
+
+        var chart3 = d3.select("#area3")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var device_line = d3.line()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y(function(d) { return y(d.device_count); });
+
+        var device_area = d3.area()
+            .curve(d3.curveMonotoneX)
+            .x(function(d) { return x(d.time); })
+            .y0(height)
+            .y1(function(d) { return y(d.device_count); });
+
+        x.domain(d3.extent(data, function(d) { return d.time; }));
+        y.domain([0, d3.max(data, function(d) { return d.device_count; })]);
+
+        chart3.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d")))
+                .append("text")
+                .attr("x", width / 2)
+                .attr("y", margin.bottom * 0.9)
+                .attr("dx", "0.32em")
+                .attr("fill", "#000")
+                .attr("text-anchor", "start")
+                .text("Date");
+
+        chart3.append("g")
+              .attr("class", "axis")
+              .call(d3.axisLeft(y))
+              .append("text")
+              .attr("fill", "#000")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 0 - margin.left)
+              .attr("x",0 - (height / 2))
+              .attr("dy", "1em")
+              .attr("text-anchor", "middle")
+              .text("Number of devices");
+
+        chart3.append("path")
+              .data([data])
+              .attr("fill", "none")
+              .attr("stroke", "steelblue")
+              .attr("stroke-linejoin", "round")
+              .attr("stroke-linecap", "round")
+              .attr("stroke-width", 1.5)
+              .attr("d", device_line);
+
+        chart3.append("path")
+                .data([data])
+                .attr("class", "area")
+                .attr("fill", "steelblue")
+                .attr("d", device_area);
+
+        </script>
+    </div>
+{% endblock %}
