@@ -2,7 +2,7 @@
 from flask import Flask
 from flask import redirect
 from flask import render_template
-from flask import request, Response
+from flask import request
 from flask import url_for
 from flask_login import LoginManager
 from flask_login import login_required
@@ -25,7 +25,6 @@ from user import User
 from forms import RegistrationForm
 from forms import LeaderboardForm
 from forms import AddDevice
-from forms import SparkLeaderboardForm
 from functools import wraps
 import datetime
 from measurement.measures import Distance
