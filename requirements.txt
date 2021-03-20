@@ -22,7 +22,7 @@ infinity==1.4
 intervals==0.8.1
 ipaddress==1.0.22
 itsdangerous==0.24
-Jinja2==2.10
+Jinja2==2.11.3
 MarkupSafe==1.0
 measurement==2.0.1
 more-itertools==4.2.0
