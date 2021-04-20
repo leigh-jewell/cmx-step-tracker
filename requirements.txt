@@ -30,7 +30,7 @@ mpmath==1.0.0
 os.path2==0.0.4
 pluggy==0.6.0
 psycopg2==2.7.3.2
-py==1.5.3
+py==1.10.0
 pytest==3.6.0
 requests==2.21.0
 requests-toolbelt==0.8.0
