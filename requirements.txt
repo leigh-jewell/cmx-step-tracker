@@ -17,7 +17,7 @@ Flask-Login==0.4.1
 Flask-Responses==0.2
 Flask-WTF==0.14.2
 future==0.16.0
-idna==2.6
+idna==3.15
 infinity==1.4
 intervals==0.8.1
 ipaddress==1.0.22
